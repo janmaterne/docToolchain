@@ -1,27 +1,35 @@
+//tag::globalConfig[]
+// Path where all output will be done.
+// Should be ignored by the version control system.
 outputPath = 'build'
 
 // Path where the docToolchain will search for the input files.
 // This path is appended to the docDir property specified in gradle.properties
 // or in the command line, and therefore must be relative to it.
-
 inputPath = 'src/docs';
+
+// Path where the PDF theme is placed.
+// For theming see https://github.com/asciidoctor/asciidoctor-pdf/blob/main/docs/theming-guide.adoc
 pdfThemeDir = './src/docs/pdfTheme'
 
+// Specify the files to render and there formats.
+//TODO: which formats are available?
 inputFiles = [
         //[file: 'doctoolchain_demo.adoc',       formats: ['html','pdf']],
         //[file: 'arc42-template.adoc',    formats: ['html','pdf']],
         /** inputFiles **/
 ]
 
-//folders in which asciidoc will find images.
-//these will be copied as resources to ./images
-//folders are relative to inputPath
+// Folders in which asciidoc will find images.
+// These will be copied as resources to ./images
+// Folders are relative to inputPath.
 imageDirs = [
     /** imageDirs **/
 ]
 
-// these are directories (dirs) and files which Gradle monitors for a change
+// These are directories (dirs) and files which Gradle monitors for a change
 // in order to decide if the docs have to be re-build
+//TODO: recursive scanning or not?
 taskInputsDirs = [
                     "${inputPath}",
 //                  "${inputPath}/src",
@@ -29,84 +37,98 @@ taskInputsDirs = [
                  ]
 
 taskInputsFiles = []
+//end::globalConfig[]
 
 //*****************************************************************************************
 
+//tag::micrositeConfig[]
 //Configuration for microsite: generateSite + previewSite
 
 microsite = [:]
 
-// these properties will be set as jBake properties
-// microsite.foo will be site.foo in jBake and can be used as config.site_foo in a template
-// see https://jbake.org/docs/2.6.4/#configuration for how to configure jBake
-// other properties listed here might be used in the jBake templates and thus are not
+// These properties will be set as jBake properties.
+// microsite.foo will be site.foo in jBake and can be used as config.site_foo in a template.
+// See https://jbake.org/docs/2.6.4/#configuration for how to configure jBake.
+// Other properties listed here might be used in the jBake templates and thus are not
 // documented in the jBake docs but hopefully in the template docs.
 microsite.with {
+    
     /** start:microsite **/
 
-    // is your microsite deployed with a context path?
+    // Is your microsite deployed with a context path?
     contextPath = '/'
-    // configure a port on which your preview server will run
+    // Configure a port on which your preview server will run.
     previewPort = 8881
-    // the folder of a site definition (theme) relative to the docDir+inputPath
+    // The folder of a site definition (theme) relative to the docDir+inputPath
     //siteFolder = '../site'
 
     /** end:microsite **/
 
-    //project theme
-    //site folder relative to the docs folder
-    //see 'copyTheme' for more details
+    // project theme
+    // site folder relative to the docs folder
+    // see 'copyTheme' for more details
     siteFolder = '../site'
 
-    // the title of the microsite, displayed in the upper left corner
+    // The title of the microsite, displayed in the upper left corner.
     title = '##site-title##'
-    // the next items configure some links in the footer
-    //
-    // contact eMail
+    
+    /** start:footer-configuration */
+
+    // Contact eMail
     // example: mailto:bert@example.com
     footerMail = '##footer-email##'
-    //
-    // twitter account url
+
+    // Twitter account URL
+    // example: http://twitter.com/bert
     footerTwitter = '##twitter-url##'
-    //
+    
     // Stackoverflow QA
+    // example: https://stackoverflow.com/questions/tagged/doctoolchain
     footerSO = '##Stackoverflow-url##'
-    //
+    
     // Github Repository
+    // example: https://github.com/docToolchain/docToolchain
     footerGithub = '##Github-url##'
-    //
+    
     // Slack Channel
+    // example: https://gradle-community.slack.com/
     footerSlack = '##Slack-url##'
-    //
+    
     // Footer Text
     // example: <small class="text-white">built with docToolchain and jBake <br /> theme: docsy</small>
     footerText = '<small class="text-white">built with <a href="https://doctoolchain.org">docToolchain</a> and <a href="https://jbake.org">jBake</a> <br /> theme: <a href="https://www.docsy.dev/">docsy</a></small>'
-    //
-    // site title if no other title is given
+
+    //TODO: How does footer* and footerText fit together?
+    /** end:footer-configuration */
+
+    // Site title if no other title is given.
     title = 'docToolchain'
-    //
-    // the url to create an issue in github
+
+    // The url to create an issue in Github
     // Example: https://github.com/docToolchain/docToolchain/issues/new
     issueUrl = '##issue-url##'
-    //
-    // the base url for code files in github
+
+    // The base url for code files in github
     // Example: https://github.com/doctoolchain/doctoolchain/edit/master/src/docs
     branch = System.getenv("DTC_PROJECT_BRANCH")
     gitRepoUrl = '##git-repo-url##'
+    //TODO: How fit branch and url together? The branch is part of the url ('master' in the example).
 
-    //
-    // the location of the landing page
+    // The location of the landing page.
     landingPage = 'landingpage.gsp'
-    // the menu of the microsite. A map of [code:'title'] entries to specify the order and title of the entries.
-    // the codes are autogenerated from the folder names or :jbake-menu: attribute entries from the .adoc file headers
-    // set a title to '-' in order to remove this menu entry.
-    menu = [:]
 
+    // The menu of the microsite. A map of [code:'title'] entries to specify the order and title of the entries.
+    // The codes are autogenerated from the folder names or :jbake-menu: attribute entries from the .adoc file headers.
+    // Set a title to '-' in order to remove this menu entry.
+    menu = [:]
+    
 }
+//end::micrositeConfig[]
 
 //*****************************************************************************************
 
-//Configuration for exportChangelog
+//tag::changelogConfig[]
+// Configuration for exportChangelog
 
 exportChangelog = [:]
 
@@ -121,32 +143,33 @@ changelog.with {
     // It should be a single command taking a directory as a parameter.
     // You cannot use multiple commands with pipe between.
     // This command will be executed in the directory specified by changelogDir
-    // it the environment inherited from the parent process.
-    // This command should produce asciidoc text directly. The exportChangelog
-    // task does not do any post-processing
+    // and its environment is inherited from the parent process.
+    // This command should produce asciidoc text directly to STDOUT. 
+    // The exportChangelog task does not do any post-processing
     // of the output of that command.
     //
     // See also https://git-scm.com/docs/pretty-formats
     cmd = 'git log --pretty=format:%x7c%x20%ad%x20%n%x7c%x20%an%x20%n%x7c%x20%s%x20%n --date=short'
 
 }
+//end::changelogConfig[]
 
 //*****************************************************************************************
 
 //tag::confluenceConfig[]
-//Configureation for publishToConfluence
+// Configuration for publishToConfluence
 
 confluence = [:]
 
 // 'input' is an array of files to upload to Confluence with the ability
-//          to configure a different parent page for each file.
+//  to configure a different parent page for each file.
 //
-// Attributes
-// - 'file': absolute or relative path to the asciidoc generated html file to be exported
-// - 'url': absolute URL to an asciidoc generated html file to be exported
+// Attributes per entry:
+// - 'file': absolute or relative path to the asciidoc generated html file to be exported ('file' or 'url' must be specified)
+// - 'url': absolute URL to an asciidoc generated html file to be exported ('file' or 'url' must be specified)
 // - 'ancestorName' (optional): the name of the parent page in Confluence as string;
-//                             this attribute has priority over ancestorId, but if page with given name doesn't exist,
-//                             ancestorId will be used as a fallback
+//                            this attribute has priority over ancestorId, but if page with given name doesn't exist,
+//                            ancestorId will be used as a fallback
 // - 'ancestorId' (optional): the id of the parent page in Confluence as string; leave this empty
 //                            if a new parent shall be created in the space
 // - 'preambleTitle' (optional): the title of the page containing the preamble (everything
@@ -159,41 +182,45 @@ confluence = [:]
 //                            use this if you only have access to one confluence space but need to store several
 //                            pages with the same title - a different pagePrefix will make them unique
 // - 'pageSuffix' (optional): same usage as prefix but appended to the title and it's subpages
-// only 'file' or 'url' is allowed. If both are given, 'url' is ignored
+//
+// Only 'file' or 'url' is allowed. If both are given, 'url' is ignored.
 confluence.with {
     input = [
-            [ file: "build/html5/arc42-template-de.html" ],
+        [ file: "build/html5/arc42-template-de.html" ],
+        [ file: "build/html5/arc42-template-en.html" ]
+        // [ url: "http://server:8080/mypage.html", ancestorName: "My Page" ]
     ]
 
-    // endpoint of the confluenceAPI (REST) to be used
-    // verfiy that you got the correct endpoint by browsing to
+    // Endpoint of the confluenceAPI (REST) to be used.
+    // Verify that you got the correct endpoint by browsing to
     // https://[yourServer]/[context]/rest/api/user/current
-    // you should get a valid json which describes your current user
-    // a working example is https://arc42-template.atlassian.net/wiki/rest/api/user/current
+    // You should get a valid json which describes your current user.
+    // A working example is https://arc42-template.atlassian.net/wiki/rest/api/user/current
     api = 'https://[yourServer]/[context]/rest/api/'
 
-    //    Additionally, spaceKey, createSubpages, pagePrefix and pageSuffix can be globally defined here. The assignment in the input array has precedence
+    // Additionally, spaceKey, createSubpages, pagePrefix and pageSuffix can be globally defined here. The assignment in the input array has precedence.
 
-    // the key of the confluence space to write to
+    // The key of the confluence space to write to.
     spaceKey = 'asciidoc'
 
-    // the title of the page containing the preamble (everything the first second level heading). Default is 'arc42'
+    // The title of the page containing the preamble (everything the first second level heading). Default is 'arc42'.
     preambleTitle = ''
 
-    // variable to determine whether ".sect2" sections shall be split from the current page into subpages
+    // Variable to determine whether ".sect2" sections shall be split from the current page into subpages.
     createSubpages = false
 
-    // the pagePrefix will be a prefix for each page title
-    // use this if you only have access to one confluence space but need to store several
-    // pages with the same title - a different pagePrefix will make them unique
+    // The pagePrefix will be a prefix for each page title.
+    // Use this if you only have access to one confluence space but need to store several
+    // pages with the same title - a different pagePrefix will make them unique.
     pagePrefix = ''
 
+    // The pageSuffix - analog to pagePrefix.
     pageSuffix = ''
 
     /*
     WARNING: It is strongly recommended to store credentials securely instead of commiting plain text values to your git repository!!!
 
-    Tool expects credentials that belong to an account which has the right permissions to to create and edit confluence pages in the given space.
+    Tool expects credentials that belong to an account which has the right permissions to create and edit confluence pages in the given space.
     Credentials can be used in a form of:
      - passed parameters when calling script (-PconfluenceUser=myUsername -PconfluencePass=myPassword) which can be fetched as a secrets on CI/CD or
      - gradle variables set through gradle properties (uses the 'confluenceUser' and 'confluencePass' keys)
@@ -201,7 +228,7 @@ confluence.with {
     -Pusername=myUser -Ppassword=myPassword
     */
 
-    //optional API-token to be added in case the credentials are needed for user and password exchange.
+    // Optional API-token to be added in case the credentials are needed for user and password exchange.
     //apikey = "[API-token]"
 
     // HTML Content that will be included with every page published
@@ -213,24 +240,25 @@ confluence.with {
     // enable or disable attachment uploads for local file references
     enableAttachments = false
 
-    // default attachmentPrefix = attachment - All files to attach will require to be linked inside the document.
+    // Default attachmentPrefix = attachment - All files to attach will require to be linked inside the document.
     // attachmentPrefix = "attachment"
 
-
-    // Optional proxy configuration, only used to access Confluence
-    // schema supports http and https
+    // Optional proxy configuration, only used to access Confluence.
+    // Schema supports http and https.
     // proxy = [host: 'my.proxy.com', port: 1234, schema: 'http']
 
-    // Optional: specify which Confluence OpenAPI Macro should be used to render OpenAPI definitions
-    // possible values: ["confluence-open-api", "open-api", true]. true is the same as "confluence-open-api" for backward compatibility
+    // Optional: specify which Confluence OpenAPI Macro should be used to render OpenAPI definitions.
+    // Possible values: ["confluence-open-api", "open-api", true]. true is the same as "confluence-open-api" for backward compatibility
     // useOpenapiMacro = "confluence-open-api"
 }
 //end::confluenceConfig[]
+
 //*****************************************************************************************
+
 //tag::exportEAConfig[]
-//Configuration for the export script 'exportEA.vbs'.
+// Configuration for the export script 'exportEA.vbs'.
 // The following parameters can be used to change the default behaviour of 'exportEA'.
-// All parameter are optionally.
+// All parameter are optional.
 // Parameter 'connection' allows to select a certain database connection by using the ConnectionString as used for
 // directly connecting to the project database instead of looking for EAP/EAPX files inside and below the 'src' folder.
 // Parameter 'packageFilter' is an array of package GUID's to be used for export. All images inside and in all packages below the package represented by its GUID are exported.
@@ -253,6 +281,8 @@ exportEA.with {
 }
 //end::exportEAConfig[]
 
+//*****************************************************************************************
+
 //tag::htmlSanityCheckConfig[]
 htmlSanityCheck.with {
     //sourceDir = "build/html5/site"
@@ -260,13 +290,16 @@ htmlSanityCheck.with {
 }
 //end::htmlSanityCheckConfig[]
 
+//*****************************************************************************************
+
 //tag::jiraConfig[]
 // Configuration for Jira related tasks
+
 jira = [:]
 
 jira.with {
 
-    // endpoint of the JiraAPI (REST) to be used
+    // Endpoint of the JiraAPI (REST) to be used.
     api = 'https://your-jira-instance'
 
     /*
@@ -280,16 +313,17 @@ jira.with {
     -Pusername=myUser -Ppassword=myPassword
     */
 
-    // the key of the Jira project
+    // The key of the Jira project.
     project = 'PROJECTKEY'
 
-    // the format of the received date time values to parse
+    // The format of the received date time values to parse.
     dateTimeFormatParse = "yyyy-MM-dd'T'H:m:s.SSSz" // i.e. 2020-07-24'T'9:12:40.999 CEST
 
-    // the format in which the date time should be saved to output
+    // The format in which the date time should be saved to output.
     dateTimeFormatOutput = "dd.MM.yyyy HH:mm:ss z" // i.e. 24.07.2020 09:02:40 CEST
 
-    // the label to restrict search to
+    // The label to restrict search to.
+    //TODO: really unset? Or '' or commented out?
     label =
 
     // Legacy settings for Jira query. This setting is deprecated & support for it will soon be completely removed. Please use JiraRequests settings
@@ -332,13 +366,15 @@ class JiraRequest {
 }
 //end::jiraConfig[]
 
+//*****************************************************************************************
+
 //tag::openApiConfig[]
 // Configuration for OpenAPI related task
+
 openApi = [:]
 
-// 'specFile' is the name of OpenAPI specification yaml file. Tool expects this file inside working dir (as a filename or relative path with filename)
-// 'infoUrl' and 'infoEmail' are specification metadata about further info related to the API. By default this values would be filled by openapi-generator plugin placeholders
-//
+// 'specFile' is the name of OpenAPI specification yaml file. Tool expects this file inside working dir (as a filename or relative path with filename).
+// 'infoUrl' and 'infoEmail' are specification metadata about further info related to the API. By default this values would be filled by openapi-generator plugin placeholders.
 
 openApi.with {
     specFile = 'src/docs/petstore-v2.0.yaml' // i.e. 'petstore.yaml', 'src/doc/petstore.yaml'
@@ -347,10 +383,14 @@ openApi.with {
 }
 //end::openApiConfig[]
 
+//*****************************************************************************************
+
 //tag::sprintChangelogConfig[]
 // Sprint changelog configuration generate changelog lists based on tickets in sprints of an Jira instance.
-// This feature requires at least Jira API & credentials to be properly set in Jira section of this configuration
+// This feature requires at least Jira API & credentials to be properly set in Jira section of this configuration.
+
 sprintChangelog = [:]
+
 sprintChangelog.with {
     sprintState = 'closed' // it is possible to define multiple states, i.e. 'closed, active, future'
     ticketStatus = "Done, Closed" // it is possible to define multiple ticket statuses, i.e. "Done, Closed, 'in Progress'"
@@ -360,11 +400,11 @@ sprintChangelog.with {
     showTicketType = true
     sprintBoardId = 12345  // Jira instance probably have multiple boards; here it can be defined which board should be used
 
-    // Output folder for this task inside main outputPath
+    // Output folder for this task inside main outputPath.
     resultsFolder = 'Sprints'
 
-    // if sprintName is not defined or sprint with that name isn't found, release notes will be created on for all sprints that match sprint state configuration
-    sprintName = 'PRJ Sprint 1' // if sprint with a given sprintName is found, release notes will be created just for that sprint
+    // If sprintName is not defined or sprint with that name isn't found, release notes will be created on for all sprints that match sprint state configuration.
+    sprintName = 'PRJ Sprint 1' // If sprint with a given sprintName is found, release notes will be created just for that sprint.
     allSprintsFilename = 'Sprints_Changelogs' // Extension will be automatically added.
 }
 //end::sprintChangelogConfig[]
